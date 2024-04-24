@@ -1,12 +1,11 @@
 import type { Activity, Competition, Person, Room, Schedule, Venue } from '@wca/helpers';
-import { useMemo } from 'react';
-
 import FullCalendar from '@fullcalendar/react';
-import { formatDate } from '@fullcalendar/core';
+
 import dayGridPlugin from '@fullcalendar/daygrid';
-import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
 import interactionPlugin from '@fullcalendar/interaction';
-//import { Resource } from '@fullcalendar/resource/inter';
+import momentTimezonePlugin from '@fullcalendar/moment-timezone';
+import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
+import { useMemo } from 'react';
 
 
 const extId = 'org.cubingusa.natshelper.v1.Person';
@@ -41,7 +40,7 @@ function personIsInTeam(person: Person) {
 }
 
 function asResources(persons: Person[]) {
-  return persons.filter(personIsInTeam).map(p => ({
+  return persons.map(p => ({
     id: p.wcaUserId.toString(),
     title: p.name,
     teamId: `Team ${teamForPerson(p)}`,
@@ -94,12 +93,12 @@ function computeActivitiesById(sched: Schedule): IdToActivityMap {
 function shortCode(code: string): string {
   const [mainAssign, subAssign] = code.split('-');
   switch (mainAssign) {
-    case 'competitor':
-      return 'C';
-    case 'staff':
-      return subAssign[0].toUpperCase();
-    default:
-      return '?';
+  case 'competitor':
+    return 'C';
+  case 'staff':
+    return subAssign[0].toUpperCase();
+  default:
+    return '?';
   }
 }
 
@@ -124,9 +123,18 @@ export default function TeamsSchedules({
 } : {
   competition: Competition
 }) {
-  const resources = useMemo(
-    () => asResources(competition.persons),
+  // This is basically to switch between two behaviors:
+  //   - if compscript's team are used, just show teams
+  //   - else just display everybody (in case somebody wants to use this on
+  //   another competition).
+  const compUsesTeams = useMemo(
+    () => competition.persons.some(personIsInTeam),
     [competition.persons]
+  );
+
+  const resources = useMemo(
+    () => asResources(compUsesTeams ? competition.persons.filter(personIsInTeam) : competition.persons),
+    [competition.persons, compUsesTeams]
   );
   const scheduleActivities = useMemo(
     () => computeActivitiesById(competition.schedule),
@@ -141,12 +149,12 @@ export default function TeamsSchedules({
   const startDate = new Date(competition.schedule.startDate);
   const endDate = new Date(startDate);
   endDate.setDate(startDate.getDate() + competition.schedule.numberOfDays);
-  console.log(competition.schedule.venues);
 
   return (
     <FullCalendar
       schedulerLicenseKey="GPL-My-Project-Is-Open-Source"
-      plugins={[dayGridPlugin, resourceTimelinePlugin, interactionPlugin]}
+      plugins={[dayGridPlugin, resourceTimelinePlugin, interactionPlugin, momentTimezonePlugin]}
+      timeZone={competition.schedule.venues[0].timezone}
       initialView="compDayView"
       initialDate={competition.schedule.startDate}
       titleFormat={{
