@@ -173,6 +173,7 @@ export default function TeamsSchedules({
       dayHeaderFormat={{
         weekday: 'short'
       }}
+      slotMinWidth={60}
       slotMinTime="08:00:00"
       slotMaxTime="21:00:00"
       slotLabelFormat={{
