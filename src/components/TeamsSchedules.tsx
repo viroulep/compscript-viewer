@@ -1,43 +1,14 @@
-import type { Activity, Competition, Person, Room, Schedule, Venue } from '@wca/helpers';
-import FullCalendar from '@fullcalendar/react';
+import type { Activity, Person, Room, Schedule, Venue } from '@wca/helpers';
+import { personIsInTeam, teamForPerson } from '@/lib/teams';
+import { useContext, useMemo } from 'react';
 
+import FullCalendar from '@fullcalendar/react';
+import { WCIFContext } from "@/lib/WCIFContext";
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
-import { useMemo } from 'react';
 
-
-const extId = 'org.cubingusa.natshelper.v1.Person';
-// This could actually just be properties: object.
-type PersonExt = {
-  properties?: {
-    'scrambles-events': string[],
-    'kind'?: string,
-    'staff-team'?: string,
-  },
-};
-
-type TeamToPersonsMap = {
-  [id: string]: Person[];
-};
-
-const DEFAULT_VAL = {
-  properties: {
-    'scrambles-events': [],
-  }
-};
-
-function teamForPerson(person: Person) {
-  const ext = person.extensions.find(e => e.id === extId);
-
-  const extData: PersonExt = ext ? ext.data as PersonExt : DEFAULT_VAL;
-  return extData.properties ? extData.properties['staff-team'] : undefined;
-}
-
-function personIsInTeam(person: Person) {
-  return teamForPerson(person) !== undefined;
-}
 
 function asResources(persons: Person[]) {
   return persons.map(p => ({
@@ -118,11 +89,8 @@ function computeEvents(persons: Person[], partialActivities: IdToActivityMap) {
   }));
 }
 
-export default function TeamsSchedules({
-  competition,
-} : {
-  competition: Competition
-}) {
+export default function TeamsSchedules() {
+  const competition = useContext(WCIFContext);
   // This is basically to switch between two behaviors:
   //   - if compscript's team are used, just show teams
   //   - else just display everybody (in case somebody wants to use this on

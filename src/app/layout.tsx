@@ -1,7 +1,17 @@
-import { Inter } from "next/font/google";
-import type { Metadata } from "next";
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
 
-const inter = Inter({ subsets: ["latin"] });
+import type { Metadata, Viewport } from "next";
+
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
+import CssBaseline from '@mui/material/CssBaseline';
+
+export const viewport: Viewport = {
+  initialScale: 1,
+  width: 'device-width',
+}
 
 export const metadata: Metadata = {
   title: "Compscript Viewer",
@@ -15,7 +25,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <CssBaseline />
+      <body>
+        <AppRouterCacheProvider>
+          {children}
+        </AppRouterCacheProvider>
+      </body>
     </html>
   );
 }
