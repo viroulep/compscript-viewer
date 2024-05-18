@@ -19,7 +19,7 @@ function isLeader(person: Person) {
   return (person.roles || []).includes("delegate");
 }
 
-function Person({ p } : { p: Person }) {
+function PersonItem({ p } : { p: Person }) {
   const { name, wcaId, avatar } = p;
   const url = wcaId ? `https://www.worldcubeassociation.org/persons/${wcaId}` : '#';
   return (
@@ -51,13 +51,13 @@ function Team({ id, persons } : { id: string, persons: Person[] }) {
       <CardContent>
         <Typography variant="h5" component="h2">Team {id}</Typography>
         <Stack direction="row">
-          {leaders.map(p => <Person key={p.wcaUserId} p={p} />)}
+          {leaders.map(p => <PersonItem key={p.wcaUserId} p={p} />)}
         </Stack>
         <hr />
         <Grid container>
           {members.map(p => (
             <Grid xs={4} key={p.wcaUserId}>
-              <Person p={p} />
+              <PersonItem p={p} />
             </Grid>
           ))}
         </Grid>
