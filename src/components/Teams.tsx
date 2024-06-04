@@ -82,7 +82,7 @@ export default function Teams() {
           <Grid xs={6}>
             <Team key={a} id={a} persons={teams.get(a) || []} />
           </Grid>
-          {b.length > 0 && (
+          {b !== '' && (
             <Grid xs={6}>
               <Team key={b} id={b} persons={teams.get(b) || []} />
             </Grid>
