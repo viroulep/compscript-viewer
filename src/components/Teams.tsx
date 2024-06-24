@@ -1,3 +1,4 @@
+import { createTeamToPersonsMap, sorter } from "@/lib/teams";
 import { useContext, useMemo } from "react";
 
 import Avatar from '@mui/material/Avatar';
@@ -13,7 +14,6 @@ import { Person } from "@wca/helpers";
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { WCIFContext } from "@/lib/WCIFContext";
-import { createTeamToPersonsMap } from "@/lib/teams";
 
 function isLeader(person: Person) {
   return (person.roles || []).includes("delegate");
@@ -69,7 +69,9 @@ function Team({ id, persons } : { id: string, persons: Person[] }) {
 export default function Teams() {
   const competition = useContext(WCIFContext);
   const teams = useMemo(() => createTeamToPersonsMap(competition), [competition]);
-  const teamKeys = [...teams.keys()].filter(teamId => teamId !== 'none').sort();
+  const teamKeys =
+    [...teams.keys()].filter(teamId => teamId !== 'none')
+      .sort(sorter(competition));
   const rows = [];
   // Construct rows manually because I want to manually insert a page break
   for (let i = 0; i < teamKeys.length; i += 2) {
